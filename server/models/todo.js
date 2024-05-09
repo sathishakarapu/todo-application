@@ -7,7 +7,7 @@ const todoSchema = new mongoose.Schema({
     },
     status:{
         type:String,
-        enum:["pending","completed"],default:"pending"
+        default:"pending"
     },
     timeTaken:{
         type:Number,
@@ -15,30 +15,14 @@ const todoSchema = new mongoose.Schema({
     },
     action:{
         type:String,
-        enum:["start","stop","pause","resume"],default:"start"
-    },
-    isRunning:{
-        type:Boolean,
-        default:false
+        default:"start"
     },
     user:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"User",
+        type:String,
+        required:true,
     }
 },{timestamps:true});
 
 const todoModel = mongoose.model("Todolist", todoSchema);
 
 module.exports = todoModel;
-
-todoSchema.pre("save", async function(next) {
-    if(this.isModified("action") && this.action === "start") {
-        const runningActivity = await thsi.constructor.findOne({user:this.user,isRunning:true});
-
-        if(runningActivity && runningActivity._id.toString() !== this._id.toString()) {
-            throw new Error("Another activity is already running"); 
-        }
-        this.isRunning = true;
-    }
-    next();
-})

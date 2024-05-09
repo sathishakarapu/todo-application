@@ -5,8 +5,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const todo = require("./models/todo");
-const  mongoose  = require("mongoose");
-const ObjectId = mongoose.Types.ObjectId
+
 
 const app = express();
 const PORT = process.env.PORT || 8080
@@ -24,6 +23,7 @@ app.listen(PORT, async () => {
     }
 })
 
+// for register new user
 app.post("/register", async (req,res) => {
     const {email,password,confirmPassword} = req.body;
 
@@ -73,7 +73,7 @@ app.post("/register", async (req,res) => {
     }
 });
 
-
+// for login existing user
 app.post("/login", async (req,res) => {
     const {email,password} = req.body;
 
@@ -126,6 +126,7 @@ app.post("/login", async (req,res) => {
     }
 });
 
+// verify the user with token in home page
 app.get("/verify", async (req,res) => {
     try {
         const token = req.headers.authorization.split(" ")[1];
@@ -158,12 +159,15 @@ app.get("/verify", async (req,res) => {
 });
 
 
+// create a new activity
 app.post("/create",async (req,res) => {
     try {
-        const {name} = req.body;
+        const { name, user } = req.body;
         const activity = new todo({
             name,
+            user
         });
+
         await activity.save();
         res.status(201).json(activity);
     } catch (error) {
@@ -172,3 +176,102 @@ app.post("/create",async (req,res) => {
     }
 });
 
+// get the all tasks by userId
+app.get('/tasks', async (req, res) => {
+    try {
+        const userId = req.query.userId;
+    
+        const tasks = await todo.find({ user : userId });
+        res.status(200).json(tasks);
+    } catch (error) {
+        console.error('Error fetching tasks:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// start the activity
+app.post('/tasks/:taskId/start', async (req, res) => {
+    try {
+      const taskId = req.params.taskId;
+      const task = await todo.findById(taskId);
+  
+      if (!task) {
+        return res.status(404).json({ error: 'Task not found' });
+      }
+
+      task.status = 'ongoing';
+      await task.save();
+  
+      res.status(200).json(task);
+    } catch (error) {
+      console.error('Error starting task:', error);
+      res.status(500).json({ error: 'Server error' });
+    }
+});
+  
+
+// resume the activity
+app.post('/tasks/:taskId/resume', async (req, res) => {
+    try {
+      const taskId = req.params.taskId;
+      const task = await todo.findById(taskId);
+  
+      if (!task) {
+        return res.status(404).json({ error: 'Task not found' });
+      }
+
+      task.status = 'ongoing';
+      await task.save();
+  
+      res.status(200).json(task);
+    } catch (error) {
+      console.error('Error resuming task:', error);
+      res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// pause the activity
+app.post('/tasks/updateTimeForPause', async (req, res) => {
+    try {
+      const taskId = req.body.taskId;
+      const timetaken = req.body.timeTaken;
+
+      const task = await todo.findById(taskId);
+  
+      if (!task) {
+        return res.status(404).json({ error: 'Task not found' });
+      }
+
+      task.timeTaken = timetaken;
+      task.status = "pause"
+      await task.save();
+  
+      res.status(200).json(task);
+    } catch (error) {
+      console.error('Error resuming task:', error);
+      res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// end the activity
+app.post('/tasks/updateTimeForEnd', async (req, res) => {
+    try {
+      const taskId = req.body.taskId;
+      const timetaken = req.body.timeTaken;
+
+      const task = await todo.findById(taskId);
+  
+      if (!task) {
+        return res.status(404).json({ error: 'Task not found' });
+      }
+
+      task.timeTaken = timetaken;
+      task.status = "completed"
+      await task.save();
+  
+      res.status(200).json(task);
+    } catch (error) {
+      console.error('Error resuming task:', error);
+      res.status(500).json({ error: 'Server error' });
+    }
+});
