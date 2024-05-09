@@ -41,3 +41,20 @@
   padding: 0;
   margin: 0;
 }
+
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid black;
+}
+
+.styled-table th,
+.styled-table td {
+  padding: 8px;
+  border: 1px solid black;
+  text-align: center;
+}
+
+.styled-table th {
+  background-color: lightgray;
+}

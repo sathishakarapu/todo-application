@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-
+const url = "https://todo-project-application-be8d5c62bc5a.herokuapp.com";
 const Container = styled.div`
   height: 500px;
   width: 400px;
@@ -55,7 +55,7 @@ const Register = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:8080/register", {
+      const response = await axios.post(`${url}/register`, {
         email,
         password,
         confirmPassword,
